@@ -19,7 +19,7 @@ class FileSerializer(serializers.ModelSerializer):
             'file_link',
             'file_size',
             'date',
-            'last_upload_date'
+            'last_upload_date',
             'user_id'
         ]
 
