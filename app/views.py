@@ -1,22 +1,26 @@
-from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import status
-from rest_framework.viewsets import ModelViewSet
 import os
-from django.http import HttpResponse, Http404
-from django.conf import settings
-from app.models import User, File, Session
-from app.serializers import UserSerializer, FileSerializer
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+import json
 import uuid
 import datetime
+
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse, Http404
+from django.conf import settings
+from rest_framework import status
+from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
+from app.models import User, File, Session
+from app.serializers import UserSerializer, FileSerializer
 
 
 # функция получает экземпляр существующей сессии или возвращает None
 def get_user_session(request):
     cookie_key = "user_session_id"
     session_id = request.COOKIES.get(cookie_key, None)
-    if session_id:
+    print(session_id)
+    if session_id is not None:
         try:
             user_session = Session.objects.get(session_id=session_id)
             return user_session
@@ -45,18 +49,26 @@ def check_admin_session(request):
 
 
 # функция открывает сессию и возвращает response
-def set_session_id(response, user_login, user_password, search_user_data):
+def set_session_id(status_code, user_login, user_password, user_data):
     cookie_key = "user_session_id"
     new_id = str(uuid.uuid4())
     add_session = Session(session_id=new_id, login=user_login, password=user_password,
-                          user_id=search_user_data[0]["id"])
+                          user_id=user_data[0]["id"])
     add_session.save()
+    json_user_data = json.dumps(user_data[0])
+    response = HttpResponse(
+        json_user_data,
+        content_type="application/json",
+        charset="utf-8",
+        status=status_code
+    )
     response.set_cookie(
         cookie_key,
-        new_id,
+        value=new_id,
+        max_age=3600,
+        secure=False,
         httponly=True,
-        samesite='lax',
-        max_age=30 * 24 * 3600
+        samesite="lax"
     )
     return response
 
@@ -105,13 +117,13 @@ class UsersViewSet(ModelViewSet):
                 request.data["name"],
                 request.data["login"],
                 request.data["password"],
-                request.data["email"],
+                request.data["email"]
             )
             user = User(
                 name=name,
                 login=login,
                 password=password,
-                email=email,
+                email=email
             )
             user.save()
             user_data = UserSerializer(user).data
@@ -163,7 +175,7 @@ class FilesViewSet(ModelViewSet):
                 request.data["user_id"],
                 request.data["comment"],
                 request.data["new_file"],
-                request.data["file_size"],
+                request.data["file_size"]
             )
 
             files_with_this_name = File.objects.filter(file_name=file_name) & File.objects.filter(user_id=user_id)
@@ -255,7 +267,7 @@ def get_link_for_file(request, file_id):
                 "status_code": 200,
                 "status": "OK",
                 "file_id": file_id,
-                "file_link": file_link,
+                "file_link": file_link
             }
         else:
             content = {
@@ -274,19 +286,18 @@ def login_view(request):
     try:
         user_login, user_password = request.data["login"], request.data["password"]
         search_user = User.objects.filter(login=user_login, password=user_password)
-        search_user_data = UserSerializer(search_user, many=True).data
+        user_data = UserSerializer(search_user, many=True).data
 
-        if search_user_data:
+        if user_data:
             if Session.objects.filter(login=user_login):
                 return Response({
                     "status": 401,
                     "error_message": "Пользователь уже вошел в систему"
                 }, status=401)
 
-            return set_session_id(Response({
-                "status_code": 200,
-                "user": search_user_data
-            }), user_login, user_password, search_user_data)
+            status_code = 200
+
+            return set_session_id(status_code, user_login, user_password, user_data)
 
         return Response({"error_msg": "user not found"})
     except Exception as e:
