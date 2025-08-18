@@ -48,7 +48,7 @@ def check_admin_session(request):
         return False
 
 
-# функция открывает сессию и возвращает response
+# функция открывает сессию и возвращает объект HttpResponse
 def set_session_id(status_code, user_login, user_password, user_data):
     cookie_key = "user_session_id"
     new_id = str(uuid.uuid4())
@@ -65,10 +65,9 @@ def set_session_id(status_code, user_login, user_password, user_data):
     response.set_cookie(
         cookie_key,
         value=new_id,
-        max_age=14 *24 * 3600,
+        max_age=14 * 24 * 3600,
         secure=False,
-        httponly=True,
-        samesite="lax"
+        httponly=True
     )
     return response
 
