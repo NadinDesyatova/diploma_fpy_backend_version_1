@@ -341,9 +341,7 @@ def check_session(request):
 
 @api_view(["GET"])
 def get_user_files(request, user_id):
-    # print(request.COOKIES.get("user_session_id", "None"))
     if check_user_session(request):
-        # print(request.COOKIES.get("user_session_id", "None"))
         user_files = File.objects.filter(user_id=user_id)
         user_files_data = FileSerializer(user_files, many=True).data
         return Response(user_files_data)
