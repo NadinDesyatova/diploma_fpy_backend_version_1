@@ -100,10 +100,16 @@ DATABASES = {
 }
 
 # CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = False
+
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_PATH = '/;HttpOnly'
-SESSION_COOKIE_SAMESITE = 'None'
+if DEBUG:
+    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_SAMESITE = 'Strict'
+else:
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -138,8 +144,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+if DEBUG:
+    STATIC_URL = 'static/'
+else:
+    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

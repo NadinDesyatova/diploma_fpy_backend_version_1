@@ -70,8 +70,7 @@ def set_session_id(status_code, user_login, user_password, user_data):
         cookie_key,
         value=new_id,
         max_age=14 * 24 * 3600,
-        httponly=True,
-        samesite='lax'
+        httponly=True
     )
     return response
 
