@@ -26,6 +26,7 @@ def get_user_session(request):
             return user_session
         except ObjectDoesNotExist:
             return None
+    return session_id
 
 
 # функция проверяет, верно ли, что запрос пришёл от пользователя с открытой сессией
@@ -40,6 +41,9 @@ def check_user_session(request):
 # функция проверяет, верно ли, что запрос пришёл от админа
 def check_admin_session(request):
     user_session = get_user_session(request)
+    if user_session is None:
+        return  False
+
     user_login = user_session.login
     try:
         user = User.objects.get(login=user_login)
@@ -66,9 +70,8 @@ def set_session_id(status_code, user_login, user_password, user_data):
         cookie_key,
         value=new_id,
         max_age=14 * 24 * 3600,
-        secure=False,
         httponly=True,
-        samesite='None'
+        samesite='lax'
     )
     return response
 
@@ -104,7 +107,7 @@ class UsersViewSet(ModelViewSet):
 
     def list(self, request, *args, **kwargs):
 
-        if check_user_session(request) and check_admin_session(request):
+        if check_admin_session(request):
             queryset = self.queryset
             serializer = self.serializer_class(queryset, many=True)
             return Response(serializer.data)
@@ -126,6 +129,7 @@ class UsersViewSet(ModelViewSet):
                 email=email
             )
             user.save()
+
             user_data = UserSerializer(user).data
             content = {
                 "status_code": 200,
@@ -138,7 +142,7 @@ class UsersViewSet(ModelViewSet):
 
     def update(self, request, *args, **kwargs):
 
-        if check_user_session(request) and check_admin_session(request):
+        if check_admin_session(request):
             instance = self.get_object()
             instance.admin = request.data.get('admin')
             instance.save()
@@ -151,7 +155,7 @@ class UsersViewSet(ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
 
-        if check_user_session(request) and check_admin_session(request):
+        if check_admin_session(request):
             try:
                 instance = self.get_object()
                 self.perform_destroy(instance)
@@ -178,7 +182,7 @@ class FilesViewSet(ModelViewSet):
                 request.data["file_size"]
             )
 
-            files_with_this_name = File.objects.filter(file_name=file_name) & File.objects.filter(user_id=user_id)
+            files_with_this_name = File.objects.filter(user_id=user_id, file_name=file_name)
             final_file_name = file_name
             if files_with_this_name:
                 final_file_name = add_postfix(file_name)
@@ -287,6 +291,8 @@ def login_view(request):
         user_login, user_password = request.data["login"], request.data["password"]
         search_user = User.objects.filter(login=user_login, password=user_password)
         user_data = UserSerializer(search_user, many=True).data
+        print(user_login)
+        print(len(user_data))
 
         if user_data:
             if Session.objects.filter(login=user_login):
