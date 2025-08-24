@@ -9,7 +9,7 @@
 `ssh-keygen`
 
 - Скопировать публичный ключ ssh с помощью команды 
-`cat .ssh/название_вашего_файла_ssh_key.pub`
+`cat .ssh/название_вашего_ssh_файла.pub`
 
 - Заказать сервер с ОС Linux, например Ubuntu (добавив скопированный ssh), например на reg.ru https://cloud.reg.ru/
 
@@ -31,8 +31,10 @@
 `cd ~`
 
 - Выполнить команды для обновления apt
-`sudo apt update`
-`sudo apt upgrade`
+```
+sudo apt update
+sudo apt upgrade
+```
 
 - Установить базовые программы:
 `sudo apt install python3-venv python3-pip postgresql nginx`
@@ -52,18 +54,22 @@
 `cd diploma_fpy_backend_version_1`
 
 - Создать базу данных, выполнив последовательно команды:
-`sudo su postgres`
-`psql`
-`ALTER USER postgres WITH PASSWORD 'ваш_пароль';`
-`CREATE DATABASE diploma_fpy_backend_version_1;`
-`ALTER ROLE postgres SET client_encoding TO 'utf8';`
-`ALTER ROLE postgres SET default_transaction_isolation TO 'read committed';`
-`ALTER ROLE postgres SET timezone TO 'Europe/Moscow';`
-`GRANT ALL PRIVILEGES ON DATABASE diploma_fpy_backend_version_1 TO postgres;`
+```
+sudo su postgres
+psql
+ALTER USER postgres WITH PASSWORD 'ваш_пароль';
+CREATE DATABASE название_вашей_бызы_данных;
+ALTER ROLE postgres SET client_encoding TO 'utf8';
+ALTER ROLE postgres SET default_transaction_isolation TO 'read committed';
+ALTER ROLE postgres SET timezone TO 'Europe/Moscow';
+GRANT ALL PRIVILEGES ON DATABASE название_вашей_базы_данных TO postgres;
+```
 
 - Выполнить команды для выхода 
-`\q`
-`exit`
+```
+\q
+exit
+```
 
 - Создать файл .env командой 
 `nano .env`
@@ -84,8 +90,10 @@ MEDIA_ROOT_NAME=media
 - Сохранить изменения (`Ctrl + x` => `y` => `Enter`)
 
 - Создать и активировать виртуальное окружение
-`python3 -m venv env`
-`source env/bin/activate`
+```
+python3 -m venv env
+source env/bin/activate
+```
 
 - Установить зависимости
 `pip install -r requirements.txt`
@@ -96,10 +104,13 @@ MEDIA_ROOT_NAME=media
 - Выполнить команду
 `python manage.py migrate`
 
-- Можно запустить сервер с помощью gunicorn, используя интерфейс 0.0.0.0:8000 (после этого сервер будет доступен по адресу: ip_сервера:8000)
+- Можно запустить сервер с помощью gunicorn, используя интерфейс 0.0.0.0:8000 
+(после этого сервер будет доступен по адресу: ip_сервера:8000)
 `gunicorn diploma_backend.wsgi -b 0.0.0.0:8000`
 
-- Либо можно сделать gunicorn сервисом в операционной системе, чтобы он был постоянно запущен и при старте сервера сам перезапускался, для этого нужно ввести команду для создания файла с настройками сервиса gunicorn (вводится в корне проекта)
+- Либо можно сделать gunicorn сервисом в операционной системе, 
+чтобы он был постоянно запущен и при старте сервера сам перезапускался, 
+для этого нужно ввести команду для создания файла с настройками сервиса gunicorn
 `sudo nano /etc/systemd/system/mycloud.service`
 
 - Сохранить настройки сервиса в файле:
@@ -119,9 +130,11 @@ WantedBy=multi-user.target
 ```
 
 - После создания юнита выполните:
-`sudo systemctl daemon-reload`
-`sudo systemctl start mycloud`
-`sudo systemctl enable mycloud`
+```
+sudo systemctl daemon-reload
+sudo systemctl start mycloud
+sudo systemctl enable mycloud
+```
 
 - Далее необходимо собрать статику с помощью команды:
 `python manage.py collectstatic`
@@ -154,15 +167,19 @@ server {
 }
 ```
 - Далее нужно создать симлинк и перезагрузить Nginx:
-`sudo ln -s /etc/nginx/sites-available/mycloud /etc/nginx/sites-enabled/`
-`sudo nginx -t`
-`sudo systemctl reload nginx`
-`sudo ufw allow 'Nginx Full`
+```
+sudo ln -s /etc/nginx/sites-available/mycloud /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+sudo ufw allow 'Nginx Full'
+```
 
-- При возникновении ошибки 502 Bad Gateway при развертывании с Nginx, убедитесь, что пользователь, от которого запущен Nginx (обычно www-data), имеет права на чтение/запись в директорию, где создается файл .sock.
+- При возникновении ошибки 502 Bad Gateway при развертывании с Nginx, убедитесь, 
+что пользователь, от которого запущен Nginx (обычно www-data), имеет права на чтение/запись в директорию, где создается файл .sock.
 - Проверить права можно с помощью команды:
 `ls -l`
-- Если права не установлены должным образом, можно добавить пользователя Nginx в группу, от которой создаётся файл .sock, — тогда доступ должен быть. 
+- Если права не установлены должным образом, можно добавить пользователя Nginx в группу, от которой создаётся файл .sock, 
+— тогда доступ должен быть. 
 - Для этого нужно использовать команду:
 `usermod www-data -aG ваш_пользователь`
 

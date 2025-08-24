@@ -1,3 +1,5 @@
+from django.conf import settings
+
 import os
 import json
 import uuid
@@ -70,7 +72,9 @@ def set_session_id(status_code, user_login, user_password, user_data):
         cookie_key,
         value=new_id,
         max_age=14 * 24 * 3600,
-        httponly=True
+        secure=settings.SESSION_COOKIE_SECURE,
+        httponly=True,
+        samesite=settings.SESSION_COOKIE_SAMESITE
     )
     return response
 
