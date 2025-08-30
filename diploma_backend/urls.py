@@ -19,8 +19,8 @@ from rest_framework.routers import DefaultRouter
 from django.contrib import admin
 from django.urls import path
 
-from app.views import (UsersViewSet, FilesViewSet, get_link_for_file, get_user_files, download_file,
-                       login_view, logout_view, check_session)
+from app.views import (UsersViewSet, FilesViewSet, get_link_for_file, retrieve_by_link, get_users,
+                       get_user_files, get_mycloud_user, check_session, download_file, login_view, logout_view)
 
 
 router = DefaultRouter()
@@ -29,21 +29,22 @@ router.register("users", UsersViewSet)
 router.register("files", FilesViewSet)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('get_link_for_file/<file_id>/', get_link_for_file),
+    path("admin/", admin.site.urls),
+    path("get_link_for_file/", get_link_for_file),
+    path("retrieve_by_link/", retrieve_by_link),
     path("login/", login_view),
     path("logout/", logout_view),
+    path("get_mycloud_user/", get_mycloud_user),
     path("check_session/", check_session),
-    path("get_user_files/<user_id>/", get_user_files),
-    path('download_file/<file_id>/', download_file),
-    path('users/', UsersViewSet.as_view({
-        'get': 'list',
+    path("get_user_files/", get_user_files),
+    path("get_users/", get_users),
+    path("download_file/", download_file),
+    path("users/", UsersViewSet.as_view({
         'post': 'create',
         'patch': 'update',
         'delete': 'destroy'
     })),
     path('files/', FilesViewSet.as_view({
-        'get': 'retrieve_by_link',
         'post': 'create',
         'patch': 'update',
         'delete': 'destroy'

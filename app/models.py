@@ -8,7 +8,7 @@ def user_directory_path(instance):
 class User(models.Model):
     name = models.CharField(max_length=100)
     login = models.CharField(max_length=100, unique=True)
-    password = models.CharField(max_length=128)
+    password = models.CharField(max_length=1000)
     email = models.CharField(max_length=100)
     admin = models.BooleanField(default=False)
     files_storage_size = models.IntegerField(default=0)
@@ -35,4 +35,3 @@ class Session(models.Model):
     session_id = models.CharField(max_length=200)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     login = models.CharField(max_length=100, unique=True)
-    password = models.CharField(max_length=128)
