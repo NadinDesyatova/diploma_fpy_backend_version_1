@@ -1,9 +1,11 @@
 import os
 import json
 import uuid
+import re
 from datetime import datetime, timezone
 
-from django.contrib.auth.hashers import check_password
+import rest_framework.exceptions
+from django.contrib.auth.hashers import make_password, check_password
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.http import HttpResponse, Http404
 from django.conf import settings
@@ -16,17 +18,25 @@ from app.models import User, File, Session
 from app.serializers import UserSerializer, FileSerializer
 
 
+def user_data_is_valid(pattern, value, error_message):
+    is_valid = pattern.match(value)
+    if is_valid is None:
+        raise rest_framework.exceptions.ValidationError(error_message)
+    return True
+
+
 # функция возвращает данные о пользователе, если логин и пароль корректны, или возвращает None
 def get_user_data(user_login, user_password):
-    search_user = User.objects.filter(login=user_login)
-    user_data = UserSerializer(search_user, many=True).data
-    if user_data:
-        hashed_password = user_data[0]["password"]
-        is_password_valid = check_password(user_password, hashed_password)
+    try:
+        search_user = User.objects.get(login=user_login)
+        is_password_valid = check_password(user_password, search_user.password)
         if is_password_valid:
-            return user_data[0]
+            user_data = UserSerializer(search_user).data
+            return user_data
         return None
-    return None
+
+    except ObjectDoesNotExist:
+        return None
 
 
 # функция получает экземпляр существующей сессии или возвращает None
@@ -118,23 +128,36 @@ class UsersViewSet(ModelViewSet):
                 request.data["email"]
             )
 
-            # В UserSerializer организована проверка email, логина и пароля. Перед сохранением
-            # пароль хэшируется с помощью make_password
-            user = User(
-                name=name,
-                login=login,
-                password=password,
-                email=email
-            )
-            user.save()
+            password_pattern = re.compile(r"^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{6,}$")
+            password_error_msg = ('В пароле должно быть не менее 6 символов, в том числе, не менее одной заглавной '
+                                  'буквы, цифры и специального символа')
 
-            user_data = UserSerializer(user).data
-            content = {
-                "status_code": 200,
-                "status": "OK",
-                "create_object": user_data
-            }
-            return Response(content)
+            email_pattern = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+            email_error_msg = 'Введите правильный адрес электронной почты'
+
+            login_pattern = re.compile(r"^[a-zA-Z][a-zA-Z0-9]{3,20}$")
+            login_error_msg = ('Корректный логин должен состоять только из латинских букв и цифр, первый символ - '
+                               'буква, длина от 4 до 20 символов')
+
+            if (user_data_is_valid(password_pattern, password, password_error_msg)
+                    and user_data_is_valid(login_pattern, login, login_error_msg)
+                    and user_data_is_valid(email_pattern, email, email_error_msg)):
+
+                user = User(
+                    name=name,
+                    login=login,
+                    password=make_password(password),
+                    email=email
+                )
+                user.save()
+
+                user_data = UserSerializer(user).data
+                content = {
+                    "status_code": 200,
+                    "status": "OK",
+                    "create_object": user_data
+                }
+                return Response(content)
 
         except ValidationError as e:
             return Response({
@@ -318,6 +341,7 @@ def login_view(request):
             return set_session_id(status_code, user_login, user_data)
 
         return Response({"Error_msg": "user not found"})
+
     except Exception as e:
         return Response({"Error": f"{e}"}, status=500)
 

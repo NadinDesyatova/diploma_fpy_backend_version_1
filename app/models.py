@@ -10,8 +10,8 @@ class User(models.Model):
     login = models.CharField(max_length=100, unique=True)
     password = models.CharField(max_length=1000)
     email = models.CharField(max_length=100)
-    admin = models.BooleanField(default=False)
-    files_storage_size = models.IntegerField(default=0)
+    admin = models.BooleanField(default=False, blank=True)
+    files_storage_size = models.IntegerField(default=0, blank=True)
 
     def __str__(self):
         return self.login
