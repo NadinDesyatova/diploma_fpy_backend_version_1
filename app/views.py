@@ -18,6 +18,7 @@ from app.models import User, File, Session
 from app.serializers import UserSerializer, FileSerializer
 
 
+# функция проверяет корректность данных пользователя или выбрасывает ошибку
 def user_data_is_valid(pattern, value, error_message):
     is_valid = pattern.match(value)
     if is_valid is None:
@@ -102,16 +103,25 @@ def delete_session_id(response, user_login):
 
 
 # функция возвращает имя файла и добавляет в имя файла номер копии и расширение
-def add_postfix(filename):
-    dot_index = filename.rfind('.')
+def get_file_name_or_name_with_postfix(user_id, filename):
+    files_with_this_name = File.objects.filter(user_id=user_id, file_name=filename)
+    final_file_name = filename
 
-    if dot_index < 0:
-        return f"{filename} (1)"
+    if files_with_this_name:
+        now = datetime.now(timezone.utc)
+        formatted_date = now.strftime("%Y-%m-%d_%H_%M_%S")
 
-    name = filename[:dot_index]
-    extension = filename[dot_index:]
+        dot_index = filename.rfind('.')
 
-    return f"{name} (1){extension}"
+        if dot_index < 0:
+            final_file_name = f"{filename}_{formatted_date}"
+
+        else:
+            name = filename[:dot_index]
+            extension = filename[dot_index:]
+            final_file_name = f"{name}_{formatted_date}{extension}"
+
+    return final_file_name
 
 
 # ModelViewSet объектов User
@@ -166,6 +176,13 @@ class UsersViewSet(ModelViewSet):
                 "error_message": f'{e}'}
             )
 
+        except Exception as e:
+            return Response({
+                "status_code": 500,
+                "status": "ERROR",
+                "error_message": f'{e}'}
+            )
+
     def update(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
@@ -208,18 +225,20 @@ class FilesViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         try:
-            file_name, user_id, comment, file_content, file_size = (
+            file_name, user_id, comment, file_content, file_size, extension = (
                 request.data["file_name"],
                 request.data["user_id"],
                 request.data["comment"],
                 request.data["new_file"],
-                request.data["file_size"]
+                request.data["file_size"],
+                request.data["extension"]
             )
 
-            files_with_this_name = File.objects.filter(user_id=user_id, file_name=file_name)
-            final_file_name = file_name
-            if files_with_this_name:
-                final_file_name = add_postfix(file_name)
+            final_file_name = get_file_name_or_name_with_postfix(user_id, file_name)
+
+            now = datetime.now(timezone.utc)
+            formatted_date = now.strftime("%Y-%m-%d_%H_%M_%S")
+            file_path_in_user_dir = f'{formatted_date}{extension}'
 
             file = File(
                 file_name=final_file_name,
@@ -227,6 +246,8 @@ class FilesViewSet(ModelViewSet):
                 file_content=file_content,
                 file_link="",
                 file_size=file_size,
+                date=now,
+                file_path_in_user_dir=file_path_in_user_dir,
                 user_id=user_id
             )
             file.save()
@@ -253,7 +274,8 @@ class FilesViewSet(ModelViewSet):
             instance = self.get_object()
             file_name = request.data.get('file_name')
             if file_name is not None:
-                instance.file_name = file_name
+                final_file_name = get_file_name_or_name_with_postfix(instance.user_id, file_name)
+                instance.file_name = final_file_name
                 instance.save()
                 serializer = self.get_serializer(instance)
                 content = {
@@ -289,9 +311,11 @@ class FilesViewSet(ModelViewSet):
 def get_link_for_file(request):
     try:
         file_id = request.data["file_id"]
-        file_link = str(uuid.uuid5(uuid.NAMESPACE_URL, file_id))
-        counts_update = File.objects.get(id=file_id).update(file_link=file_link)
-        if counts_update:
+        file_id_str = str(file_id)
+        file_link = str(uuid.uuid5(uuid.NAMESPACE_URL, file_id_str))
+        file_for_update = File.objects.filter(id=file_id).update(file_link=file_link)
+
+        if file_for_update:
             content = {
                 "status_code": 200,
                 "status": "OK",
@@ -302,7 +326,7 @@ def get_link_for_file(request):
             content = {
                 "status_code": 400,
                 "status": "ERROR",
-                "error_message": "При обновлении возникла ошибка"
+                "error_message": "Не удалось получить ссылку"
             }
 
         return Response(content)
@@ -312,11 +336,11 @@ def get_link_for_file(request):
 
 
 @api_view(['GET'])
-def retrieve_by_link(self, request):
+def retrieve_by_link(request):
     try:
         file_link = request.GET.get("link")
         file_instance = File.objects.get(file_link=file_link)
-        serializer = self.get_serializer(file_instance)
+        serializer = FileSerializer(file_instance)
         return Response(serializer.data)
     except ObjectDoesNotExist:
         return Response({"Error": "File is not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -340,7 +364,7 @@ def login_view(request):
             status_code = 200
             return set_session_id(status_code, user_login, user_data)
 
-        return Response({"Error_msg": "user not found"})
+        return Response({"Error_msg": "user not found"}, status=404)
 
     except Exception as e:
         return Response({"Error": f"{e}"}, status=500)
@@ -357,7 +381,7 @@ def logout_view(request):
         if response:
             return response
 
-        return Response({"Error_msg": "user not found"}, status=401)
+        return Response({"Error_msg": "user not found"}, status=404)
 
     except Exception as e:
         return Response({"Error": f"{e}"}, status=500)
@@ -396,7 +420,7 @@ def check_session(request):
                 })
             return Response({"Error_message": "Неверный логин или пароль"}, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({"Error_message": "user not found"}, status=401)
+        return Response({"Error_message": "user not found"}, status=404)
 
     except Exception as e:
         return Response({"Error": f"{e}"}, status=500)
@@ -419,8 +443,8 @@ def get_users(request):
     try:
         request_from_admin = request.data["request_from_admin"]
         if request_from_admin:
-            user_queryset = User.objects.all()
-            users_data = UserSerializer(user_queryset, many=True)
+            users_queryset = User.objects.all()
+            users_data = UserSerializer(users_queryset, many=True).data
             return Response(users_data)
 
         return Response({"Error_message": "Права администратора не подтверждены"}, status=401)
@@ -432,29 +456,31 @@ def get_users(request):
 @api_view(['PATCH'])
 def download_file(request):
     try:
-        user_id, file_id, share_file, is_user_files_for_admin = (
+        user_id, file_id, is_user_files_for_admin = (
             request.data["user_id"],
             request.data["file_id"],
-            request.data["share_file"],
             request.data["is_user_files_for_admin"]
         )
+
         file_obj = File.objects.get(id=file_id)
-        if share_file or is_user_files_for_admin or file_obj.user_id == user_id:
-            file_name_in_media = str(FileSerializer(file_obj).data["id"])
-            file_path = os.path.join(settings.MEDIA_ROOT, file_name_in_media)
+        if is_user_files_for_admin or file_obj.user_id == user_id:
+            file_path_in_user_dir = str(FileSerializer(file_obj).data["file_path_in_user_dir"])
+            dir_name_in_media = f'user_{user_id}'
+            file_path = os.path.join(settings.MEDIA_ROOT, dir_name_in_media, file_path_in_user_dir)
             print(file_path)
             if not os.path.exists(file_path):
                 raise Http404("File does not exist")
 
             current_datetime = datetime.now(timezone.utc)
-            file_obj.update(last_upload_date=current_datetime)
+            file_obj.last_upload_date = current_datetime
+            file_obj.save()
 
             with open(file_path, 'rb') as f:
                 response = HttpResponse(f.read(), content_type='application/octet-stream')
                 response['Content-Disposition'] = f'attachment; filename="{file_obj.file_name}"'
                 return response
 
-        return Response({"Error_message": "Недостаточно прав"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"Error_message": "Недостаточно прав"}, status=401)
 
     except ObjectDoesNotExist:
         raise Http404("File is not found")

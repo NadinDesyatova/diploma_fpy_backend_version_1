@@ -1,5 +1,6 @@
 from django.db.models.signals import post_migrate
 from django.dispatch import receiver
+from django.contrib.auth.hashers import make_password
 from .models import User
 
 
@@ -13,7 +14,7 @@ def create_admin_user(sender, **kwargs):
             defaults={
                 'name': 'Admin',
                 'admin': True,
-                'password': 'admin#R4',
+                'password': make_password('admin#R4'),
                 'email': 'admin@admin.com'
             }
         )
