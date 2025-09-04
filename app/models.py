@@ -18,7 +18,7 @@ class User(models.Model):
 
 
 class File(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='files')
     file_content = models.FileField(upload_to=user_directory_path)
     file_name = models.CharField(max_length=255)
     file_path_in_user_dir = models.CharField(max_length=255)

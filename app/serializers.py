@@ -4,9 +4,11 @@ from app.models import User, File, Session
 
 
 class UserSerializer(serializers.ModelSerializer):
+    files = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
+
     class Meta:
         model = User
-        fields = ['id', 'name', 'login', 'password', 'email', 'admin', 'files_storage_size']
+        fields = ['id', 'name', 'login', 'password', 'email', 'admin', 'files_storage_size', 'files']
 
 
 class FileSerializer(serializers.ModelSerializer):
