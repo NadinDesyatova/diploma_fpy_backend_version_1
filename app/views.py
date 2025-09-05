@@ -93,13 +93,15 @@ def set_session_id(status_code, user_login, user_data):
 
 # функция удаляет сессию
 def delete_session_id(response, user_login):
-    search_session = Session.objects.filter(login=user_login)
-    if search_session:
-        del search_session
+    try:
+        search_session = Session.objects.get(login=user_login)
+        search_session.delete()
         cookie_key = "user_session_id"
         response.delete_cookie(cookie_key)
         return response
-    return False
+
+    except ObjectDoesNotExist:
+        return False
 
 
 # функция возвращает имя файла и добавляет в имя файла номер копии и расширение
@@ -122,6 +124,38 @@ def get_file_name_or_name_with_postfix(user_id, filename):
             final_file_name = f"{name}_{formatted_date}{extension}"
 
     return final_file_name
+
+
+def change_file_field_value(instance, changing_field, new_value):
+    if new_value:
+        if changing_field == 'file_name':
+            final_field_value = get_file_name_or_name_with_postfix(instance.user_id, new_value)
+        else:
+            final_field_value = new_value
+
+        setattr(instance, changing_field, final_field_value)
+        serializer = FileSerializer(instance)
+        instance.save()
+
+        content = {
+            "status_code": 200,
+            "status": "OK",
+            "file": serializer.data
+        }
+
+    else:
+        if changing_field == 'file_name':
+            error_msg = "File_name is required"
+        else:
+            error_msg = "Comment is required"
+
+        content = {
+            "status_code": 400,
+            "status": "ERROR",
+            "error_message": error_msg
+        }
+
+    return Response(content)
 
 
 # ModelViewSet объектов User
@@ -272,25 +306,10 @@ class FilesViewSet(ModelViewSet):
     def update(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            file_name = request.data.get('file_name')
-            if file_name is not None:
-                final_file_name = get_file_name_or_name_with_postfix(instance.user_id, file_name)
-                instance.file_name = final_file_name
-                instance.save()
-                serializer = self.get_serializer(instance)
-                content = {
-                    "status_code": 200,
-                    "status": "OK",
-                    "file": serializer.data
-                }
-            else:
-                content = {
-                    "status_code": 400,
-                    "status": "ERROR",
-                    "error_message": "File_name is required"
-                }
+            changing_field = request.data.get('changing_field')
+            new_value = request.data.get('new_value')
 
-            return Response(content)
+            return change_file_field_value(instance, changing_field, new_value)
 
         except Http404:
             return Response({"detail": "File is not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -298,6 +317,13 @@ class FilesViewSet(ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
+
+            file_owner = User.objects.get(id=instance.user_id)
+            storage_size_of_owner = file_owner.files_storage_size
+            final_storage_size = storage_size_of_owner - int(instance.file_size)
+            file_owner.files_storage_size = final_storage_size
+            file_owner.save()
+
             self.perform_destroy(instance)
 
         except Http404:
@@ -429,10 +455,14 @@ def check_session(request):
 @api_view(["POST"])
 def get_user_files(request):
     try:
-        user_id = request.data["user_id"],
+        user_id = request.data["user_id"]
+        User.objects.get(id=user_id)
         user_files = File.objects.filter(user_id=user_id)
         user_files_data = FileSerializer(user_files, many=True).data
         return Response(user_files_data)
+
+    except ObjectDoesNotExist:
+        return Response({'error': f'User is not found'}, status=404)
 
     except Exception as e:
         return Response({'error': f'{e}'}, status=500)
