@@ -191,15 +191,15 @@ sudo ufw allow 'Nginx Full'
 - Скопируйте себе на локальный компьютер репозиторий фронтенда с помощью команды:
 `git clone https://github.com/NadinDesyatova/diploma_fpy_frontend.git`
 
-- Создайте с помощью вашего IDE файл .env в корне проекта
+- Создайте с помощью вашей IDE файл .env в корне проекта
 
 - Задайте значения для переменных в файле .env:
 ```
 VITE_APP_BASE_URL_WEBSITE = http://localhost:5173/ # адрес клиентского приложения
-VITE_APP_BASE_USL_API = http://your-server-ip-or-domain.com/ # IP сервера или домен
+VITE_APP_BASE_USL_API = http://your-server-ip-or-domain.com/ # IP сервера или домен (для локальной разработки: http://127.0.0.1:8000/)
 ```
 
-- Откройте терминал, и перейдите в папку фронтенд-проекта.
+- Откройте терминал и перейдите в папку фронтенд-проекта `cd адрес_папки_frontend_проекта`
 
 - Для локального использования приложения выполните команду 
 `npm run dev`

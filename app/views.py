@@ -456,13 +456,13 @@ def check_session(request):
 def get_user_files(request):
     try:
         user_id = request.data["user_id"]
-        User.objects.get(id=user_id)
-        user_files = File.objects.filter(user_id=user_id)
+        user = User.objects.get(id=user_id)
+        user_files = File.objects.filter(user_id=user.id)
         user_files_data = FileSerializer(user_files, many=True).data
         return Response(user_files_data)
 
     except ObjectDoesNotExist:
-        return Response({'error': f'User is not found'}, status=404)
+        return Response({'error': 'User is not found'}, status=404)
 
     except Exception as e:
         return Response({'error': f'{e}'}, status=500)
