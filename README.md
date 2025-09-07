@@ -210,13 +210,15 @@ VITE_APP_BASE_USL_API = http://your-server-ip-or-domain.com/ # IP сервера
 
 - Откройте терминал и перейдите в папку фронтенд-проекта `cd адрес_папки_frontend_проекта`
 
+- Выполните команду `npm install`
+
 - Для локального использования приложения выполните команду 
 `npm run dev`
 
 - Откройте в браузере клиентское приложение по адресу http://localhost:5173/
 
 
-### Инструменты / дополнительные материалы, которые пригодятся для проекта
+### Инструменты / ресурсы, которые пригодятся для проекта
 
 - [PyCharm](https://www.jetbrains.com/ru-ru/pycharm/download) и/или [VS Code](https://code.visualstudio.com),
 - [Python](https://www.python.org/),
