@@ -186,7 +186,7 @@ sudo ufw allow 'Nginx Full'
 - После этого можно проверить доступ в браузере по ip-адресу вашего сервера.
 
 
-## Пользовательский интерфейс — фронтенд
+## Пользовательский интерфейс — фронтенд на языках JavaScript, HTML, CSS с использованием библиотек React, React Router.
 
 - Скопируйте себе на локальный компьютер репозиторий фронтенда с помощью команды:
 `git clone https://github.com/NadinDesyatova/diploma_fpy_frontend.git`
@@ -205,3 +205,15 @@ VITE_APP_BASE_USL_API = http://your-server-ip-or-domain.com/ # IP сервера
 `npm run dev`
 
 - Откройте в браузере клиентское приложение по адресу http://localhost:5173/
+
+
+### Инструменты / дополнительные материалы, которые пригодятся для проекта
+
+- [PyCharm](https://www.jetbrains.com/ru-ru/pycharm/download) и/или [VS Code](https://code.visualstudio.com),
+- [Python](https://www.python.org/),
+- [Django](https://github.com/django/django),
+- [Node.js](https://nodejs.org/),
+- [React](https://reactjs.org/),
+- [Git](https://git-scm.com/) + [GitHub](https://github.com/),
+- [Reg.ru](https://www.reg.ru/).
+- 
