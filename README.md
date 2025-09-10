@@ -96,7 +96,8 @@ DB_PORT=5432
 MEDIA_URL=/media/ 
 MEDIA_ROOT_NAME=media
 ```
-- Сохранить изменения (`Ctrl + x` => `y` => `Enter`)
+- Чтобы сохранять изменения файлов в nano нужно выполнять команды:
+`Ctrl + x` => `y` => `Enter`
 
 - Создать и активировать виртуальное окружение
 ```
@@ -195,7 +196,7 @@ sudo usermod www-data -aG ваш_пользователь
 ```
 
 ## Рекомендации при внесении изменений в проект
-- Если изменения внесены в код приложения Django, нужно перезапустить процесс сервера (например, Gunicorn).
+- Если изменения внесены в код приложения Django, нужно перезапустить процесс сервера.
 ```
 sudo systemctl restart mycloud
 ```
@@ -206,28 +207,130 @@ sudo systemctl restart nginx
 ```
 
 
-
 ## Пользовательский интерфейс — фронтенд на языках JavaScript, HTML, CSS с использованием библиотек React, React Router.
 
-- Скопируйте себе на локальный компьютер репозиторий фронтенда с помощью команды:
-`git clone https://github.com/NadinDesyatova/diploma_fpy_frontend.git`
+- Выполните команду
+`cd ~`
 
-- Создайте с помощью вашей IDE файл .env в корне проекта
+- Установим Node.js через NodeSource. Сначала добавим NodeSource репозиторий:
+```
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+```
+
+- Затем установим Node.js и npm:
+```
+sudo apt install nodejs -y
+```
+
+- Проверим, что установка прошла успешно:
+```
+node -v
+npm -v
+```
+
+- Перейдите в папку backend проекта:
+```
+cd diploma_fpy_backend_version_1
+```
+
+- Скопируйте репозиторий фронтенда с помощью команды:
+```
+git clone https://github.com/NadinDesyatova/diploma_fpy_frontend.git
+```
+
+
+- Перейдите в папку frontend проекта:
+```
+cd diploma_fpy_frontend
+```
+
+- Создайте файл .env командой 
+`nano .env`
 
 - Задайте значения для переменных в файле .env:
 ```
-VITE_APP_BASE_URL_WEBSITE = http://localhost:5173/ # адрес клиентского приложения
-VITE_APP_BASE_USL_API = http://your-server-ip-or-domain.com/ # IP сервера или домен (для локальной разработки: http://127.0.0.1:8000/)
+VITE_APP_BASE_URL_WEBSITE = http://your-server-ip-or-domain.com/cloudapp/ # адрес клиентского приложения
+VITE_APP_BASE_USL_API = http://your-server-ip-or-domain.com/api/ # адрес api сервера 
 ```
-
-- Откройте терминал и перейдите в папку фронтенд-проекта `cd адрес_папки_frontend_проекта`
 
 - Выполните команду `npm install`
 
-- Для локального использования приложения выполните команду 
-`npm run dev`
+- Добавьте код в этот файл:
+```commandline
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + React</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="{% static 'diploma_frontend/main.js' %}"></script>
+  </body>
+</html>
+```
 
-- Откройте в браузере клиентское приложение по адресу http://localhost:5173/
+- Подключение фронтенда к Django: в файле urls.py проекта добавьте маршрут для обслуживания React-приложения:
+Открываем файл urls.py:
+```commandline
+nano diploma_backend/urls.py
+```
+Добавляем в urlpatterns маршрут: 
+```
+urlpatterns = [
+     path('cloudapp/', TemplateView.as_view(template_name='index.html')),
+     ...
+ ]
+```
+
+- Чтобы изменить настройки, открываем settings.py:
+```commandline
+nano diploma_backend/settings.py
+```
+
+- Добавляем в INSTALLED_APPS frontend приложение:
+```commandline
+INSTALLED_APPS = [
+    ...,
+    'diploma_fpy_frontend',
+```
+
+- Также добавляем следующие строки, чтобы Django мог обслуживать статические файлы:
+```commandline
+STATICFILES_DIRS = [
+    BASE_DIR / "diploma_fpy_frontend/static",
+]
+```
+
+- Снова перейдём в папку frontend проекта:
+```
+cd diploma_fpy_frontend
+```
+
+- Для запуска frontend приложения выполните команду:
+`npm run build`
+
+- Вернёмся в папку backend приложения:
+```commandline
+cd ..
+```
+
+- Активируем вертуальное окружение:
+```commandline
+. env/bin/activate
+```
+
+- Собираем статику с помощью команды:
+`python manage.py collectstatic`
+
+- После внесения изменений в код приложения Django, нужно перезапустить процесс сервера:
+```
+sudo systemctl restart mycloud
+```
+
+- Откройте в браузере клиентское приложение по адресу http://your-server-ip-or-domain.com/cloudapp/
 
 
 ### Инструменты / ресурсы, которые пригодятся для проекта
@@ -239,4 +342,3 @@ VITE_APP_BASE_USL_API = http://your-server-ip-or-domain.com/ # IP сервера
 - [React](https://reactjs.org/),
 - [Git](https://git-scm.com/) + [GitHub](https://github.com/),
 - [Reg.ru](https://www.reg.ru/).
-- 
