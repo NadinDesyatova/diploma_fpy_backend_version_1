@@ -1,10 +1,21 @@
 # Дипломный проект по профессии «Fullstack-разработчик на Python»
 
-## Облачное хранилище My Cloud (бэкенд на языке Python с использованием фреймворка Django и СУБД PostgreSQL)
+## Облачное хранилище My Cloud (бэкенд на языке Python с использованием фреймворка Django и СУБД PostgreSQL, фронтенд на языках JavaScript, HTML, CSS с использованием библиотек React, React Router, Webpack).
+
+## Инструменты / ресурсы, которые потребуются для проекта:
+
+- [PyCharm](https://www.jetbrains.com/ru-ru/pycharm/download) и/или [VS Code](https://code.visualstudio.com),
+- [Python](https://www.python.org/),
+- [Django](https://github.com/django/django),
+- [Node.js](https://nodejs.org/),
+- [React](https://reactjs.org/),
+- [Webpack](https://webpack.js.org/),
+- [Git](https://git-scm.com/) + [GitHub](https://github.com/),
+- [Reg.ru](https://www.reg.ru/).
 
 ## Для развертывания проекта необходимо выполнить следующие действия:
 
-- Открыть на вашем компьютере терминал для Linux и сгенерировать ssh ключ с помощью команды 
+- Откройте на вашем компьютере терминал и сгенерируйте ssh ключ с помощью команды 
 (по умолчанию ключ будет сохранён в домашней директории): 
 `ssh-keygen`
 
@@ -18,6 +29,46 @@ cat .ssh/название_вашего_ssh_файла.pub
 - Скопировать публичный ключ 
 
 - Заказать сервер с ОС Linux, например Ubuntu (добавив скопированный ssh), например на reg.ru https://cloud.reg.ru/
+
+- Скопируйте себе на локальный компьютер проект:
+```
+git clone https://github.com/NadinDesyatova/diploma_fpy_backend_version_1.git
+```
+
+- Создайте на github.com новый репозиторий, скопируйте URL-адрес своего удаленного репозитория, например, https://github.com/OWNER/REPOSITORY.git
+
+- Перейдите в локальную папку проекта и с помощью терминала привяжите к ней ваш созданный репозиторий
+```
+git remote set-url origin url-нового-репозитория
+```
+
+- В терминале перейдите в папку diploma_fpy_frontend:
+`cd diploma_fpy_frontend`
+
+- Выполните команду
+```commandline
+npm install
+```
+
+- С помощью вашей IDE создайте в корне frontend проекта файл .env
+
+- Задайте значения для переменных в файле .env:
+```
+VITE_APP_BASE_URL_WEBSITE = http://your-server-ip-or-domain.com/cloudapp/ # адрес клиентского приложения
+VITE_APP_BASE_USL_API = http://your-server-ip-or-domain.com/api/ # адрес api сервера
+```
+
+- В терминале в папке diploma_fpy_frontend выполните команду:
+```
+npm run build
+```
+
+- Отправьте изменения в ваш удаленный репозиторий:
+```commandline
+git add -A
+git commit -m 'ваше_сообщение'
+git push -u origin main
+```
 
 - Для того, чтобы подключиться к серверу, необходимо в терминале ввести команду 
 ```
@@ -56,13 +107,14 @@ sudo apt upgrade
 
 - Нажать `q` для выхода
 
-- Скопировать репозиторий с проектом командой:
-`git clone https://github.com/NadinDesyatova/diploma_fpy_backend_version_1.git`
+- Скопироуйте ваш репозиторий с проектом командой:
+`git clone https://github.com/ваш_пользователь/ваш_репозиторий.git`
 
 - Зайти в папку проекта:
 `cd diploma_fpy_backend_version_1`
+```
 
-- Создать базу данных, выполнив последовательно команды:
+- Создайте базу данных, выполнив последовательно команды:
 ```
 sudo su postgres
 psql
@@ -99,7 +151,7 @@ MEDIA_ROOT_NAME=media
 - Чтобы сохранять изменения файлов в nano нужно выполнять команды:
 `Ctrl + x` => `y` => `Enter`
 
-- Создать и активировать виртуальное окружение
+- Создайте и активируйте виртуальное окружение
 ```
 python3 -m venv env
 source env/bin/activate
@@ -114,11 +166,10 @@ source env/bin/activate
 - Выполнить команду
 `python manage.py migrate`
 
-- Можно запустить сервер с помощью gunicorn, используя интерфейс 0.0.0.0:8000 
-(после этого сервер будет доступен по адресу: ip_сервера:8000)
-`gunicorn diploma_backend.wsgi -b 0.0.0.0:8000`
+- Собираем статику с помощью команды:
+`python manage.py collectstatic`
 
-- Либо можно сделать gunicorn сервисом в операционной системе, 
+- Теперь можно сделать gunicorn сервисом в операционной системе, 
 чтобы он был постоянно запущен и при старте сервера сам перезапускался, 
 для этого нужно ввести команду для создания файла с настройками сервиса gunicorn
 `sudo nano /etc/systemd/system/mycloud.service`
@@ -145,9 +196,6 @@ sudo systemctl daemon-reload
 sudo systemctl start mycloud
 sudo systemctl enable mycloud
 ```
-
-- Далее необходимо собрать статику с помощью команды:
-`python manage.py collectstatic`
 
 - Затем необходимо настроить файл конфигурации nginx. Команда для создания файла с настройками nginx:
 `sudo nano /etc/nginx/sites-available/mycloud`
@@ -206,139 +254,7 @@ sudo systemctl restart mycloud
 sudo systemctl restart nginx
 ```
 
-
-## Пользовательский интерфейс — фронтенд на языках JavaScript, HTML, CSS с использованием библиотек React, React Router.
-
-- Выполните команду
-`cd ~`
-
-- Установим Node.js через NodeSource. Сначала добавим NodeSource репозиторий:
-```
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-```
-
-- Затем установим Node.js и npm:
-```
-sudo apt install nodejs -y
-```
-
-- Проверим, что установка прошла успешно:
-```
-node -v
-npm -v
-```
-
-- Перейдите в папку backend проекта:
-```
-cd diploma_fpy_backend_version_1
-```
-
-- Скопируйте репозиторий фронтенда с помощью команды:
-```
-git clone https://github.com/NadinDesyatova/diploma_fpy_frontend.git
-```
+### Чтобы открыть приложение, введите в адресной строке браузера: http://your-server-ip-or-domain.com/cloudapp/
 
 
-- Перейдите в папку frontend проекта:
-```
-cd diploma_fpy_frontend
-```
 
-- Создайте файл .env командой 
-`nano .env`
-
-- Задайте значения для переменных в файле .env:
-```
-VITE_APP_BASE_URL_WEBSITE = http://your-server-ip-or-domain.com/cloudapp/ # адрес клиентского приложения
-VITE_APP_BASE_USL_API = http://your-server-ip-or-domain.com/api/ # адрес api сервера 
-```
-
-- Выполните команду `npm install`
-
-- Добавьте код в этот файл:
-```commandline
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script src="{% static 'diploma_frontend/main.js' %}"></script>
-  </body>
-</html>
-```
-
-- Подключение фронтенда к Django: в файле urls.py проекта добавьте маршрут для обслуживания React-приложения:
-Открываем файл urls.py:
-```commandline
-nano diploma_backend/urls.py
-```
-Добавляем в urlpatterns маршрут: 
-```
-urlpatterns = [
-     path('cloudapp/', TemplateView.as_view(template_name='index.html')),
-     ...
- ]
-```
-
-- Чтобы изменить настройки, открываем settings.py:
-```commandline
-nano diploma_backend/settings.py
-```
-
-- Добавляем в INSTALLED_APPS frontend приложение:
-```commandline
-INSTALLED_APPS = [
-    ...,
-    'diploma_fpy_frontend',
-```
-
-- Также добавляем следующие строки, чтобы Django мог обслуживать статические файлы:
-```commandline
-STATICFILES_DIRS = [
-    BASE_DIR / "diploma_fpy_frontend/static",
-]
-```
-
-- Снова перейдём в папку frontend проекта:
-```
-cd diploma_fpy_frontend
-```
-
-- Для запуска frontend приложения выполните команду:
-`npm run build`
-
-- Вернёмся в папку backend приложения:
-```commandline
-cd ..
-```
-
-- Активируем вертуальное окружение:
-```commandline
-. env/bin/activate
-```
-
-- Собираем статику с помощью команды:
-`python manage.py collectstatic`
-
-- После внесения изменений в код приложения Django, нужно перезапустить процесс сервера:
-```
-sudo systemctl restart mycloud
-```
-
-- Откройте в браузере клиентское приложение по адресу http://your-server-ip-or-domain.com/cloudapp/
-
-
-### Инструменты / ресурсы, которые пригодятся для проекта
-
-- [PyCharm](https://www.jetbrains.com/ru-ru/pycharm/download) и/или [VS Code](https://code.visualstudio.com),
-- [Python](https://www.python.org/),
-- [Django](https://github.com/django/django),
-- [Node.js](https://nodejs.org/),
-- [React](https://reactjs.org/),
-- [Git](https://git-scm.com/) + [GitHub](https://github.com/),
-- [Reg.ru](https://www.reg.ru/).
