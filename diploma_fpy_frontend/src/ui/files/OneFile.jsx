@@ -8,6 +8,7 @@ export function OneFile ({userId, isUserFilesForAdmin, fileLink, elem, setLastFi
   const [errorMsg, setErrorMsg] = useState("");
   
   const onGetLink = async (fileId) => {
+    setErrorMsg("");
     console.log("Получение ссылки на файл");
     try {
       const response = await fetch(`${import.meta.env.VITE_APP_BASE_USL_API}get_link_for_file/`, {
@@ -38,6 +39,7 @@ export function OneFile ({userId, isUserFilesForAdmin, fileLink, elem, setLastFi
   }
 
   const onDelete = async (id) => {
+    setErrorMsg("");
     console.log("Удаление файла");
     try {
       const response = await fetch(`${import.meta.env.VITE_APP_BASE_USL_API}files/${id}/`, {
@@ -59,6 +61,7 @@ export function OneFile ({userId, isUserFilesForAdmin, fileLink, elem, setLastFi
   }
   
   const changeFile = async (elemId, changingField, promtMsg) => {
+    setErrorMsg("");
     const newValue = prompt(`Введите ${promtMsg}: `);
 
     try {

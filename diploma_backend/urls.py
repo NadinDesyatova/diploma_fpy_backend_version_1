@@ -15,13 +15,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path
-from django.views.generic import TemplateView
+
+from rest_framework.routers import DefaultRouter
 
 from app.views import (UsersViewSet, FilesViewSet, get_link_for_file, retrieve_by_link, get_users,
                        get_user_files, get_mycloud_user, check_session, download_file, login_view, logout_view)
 
+
+router = DefaultRouter()
+
+router.register("api/users", UsersViewSet)
+router.register("api/files", FilesViewSet)
+
 urlpatterns = [
-    path('cloudapp/', TemplateView.as_view(template_name='index.html')),
     path("api/get_link_for_file/", get_link_for_file),
     path("api/retrieve_by_link/", retrieve_by_link),
     path("api/login/", login_view),
@@ -41,7 +47,7 @@ urlpatterns = [
         'patch': 'update',
         'delete': 'destroy'
     })),
-]
+] + router.urls
 
 from django.conf import settings
 from django.conf.urls.static import static

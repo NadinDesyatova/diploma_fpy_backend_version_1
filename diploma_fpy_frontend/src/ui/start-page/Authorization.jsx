@@ -48,7 +48,7 @@ export function Authorization ({ SetViewPage }) {
         login: storedLogin,
         password: storedPassword
       });
-      setRequestWithLocalStorageData("...Отправляем запрос, подождите, пожалуйста...");
+      setRequestWithLocalStorageData("Отправляем запрос, подождите, пожалуйста...");
       sendFetchToCheckSession (storedLogin, storedPassword);
     }
   }, []);

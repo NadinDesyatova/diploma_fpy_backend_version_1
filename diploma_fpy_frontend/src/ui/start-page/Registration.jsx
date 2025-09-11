@@ -7,7 +7,7 @@ export function Registration ({ SetViewPage }) {
     password: '',
     email: ''
   });
-  
+
   const [resultMsg, setResultMsg] = useState('');
 
   const inputRequirements = {

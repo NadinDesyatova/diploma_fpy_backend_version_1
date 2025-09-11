@@ -1,6 +1,6 @@
 # Дипломный проект по профессии «Fullstack-разработчик на Python»
 
-## Облачное хранилище My Cloud (бэкенд на языке Python с использованием фреймворка Django и СУБД PostgreSQL, фронтенд на языках JavaScript, HTML, CSS с использованием библиотек React, React Router, Webpack).
+## Облачное хранилище My Cloud (бэкенд на языке Python с использованием фреймворка Django и СУБД PostgreSQL, фронтенд на языках JavaScript, HTML, CSS с использованием библиотек React, React Router).
 
 ## Инструменты / ресурсы, которые потребуются для проекта:
 
@@ -9,7 +9,6 @@
 - [Django](https://github.com/django/django),
 - [Node.js](https://nodejs.org/),
 - [React](https://reactjs.org/),
-- [Webpack](https://webpack.js.org/),
 - [Git](https://git-scm.com/) + [GitHub](https://github.com/),
 - [Reg.ru](https://www.reg.ru/).
 
@@ -29,46 +28,6 @@ cat .ssh/название_вашего_ssh_файла.pub
 - Скопировать публичный ключ 
 
 - Заказать сервер с ОС Linux, например Ubuntu (добавив скопированный ssh), например на reg.ru https://cloud.reg.ru/
-
-- Скопируйте себе на локальный компьютер проект:
-```
-git clone https://github.com/NadinDesyatova/diploma_fpy_backend_version_1.git
-```
-
-- Создайте на github.com новый репозиторий, скопируйте URL-адрес своего удаленного репозитория, например, https://github.com/OWNER/REPOSITORY.git
-
-- Перейдите в локальную папку проекта и с помощью терминала привяжите к ней ваш созданный репозиторий
-```
-git remote set-url origin url-нового-репозитория
-```
-
-- В терминале перейдите в папку diploma_fpy_frontend:
-`cd diploma_fpy_frontend`
-
-- Выполните команду
-```commandline
-npm install
-```
-
-- С помощью вашей IDE создайте в корне frontend проекта файл .env
-
-- Задайте значения для переменных в файле .env:
-```
-VITE_APP_BASE_URL_WEBSITE = http://your-server-ip-or-domain.com/cloudapp/ # адрес клиентского приложения
-VITE_APP_BASE_USL_API = http://your-server-ip-or-domain.com/api/ # адрес api сервера
-```
-
-- В терминале в папке diploma_fpy_frontend выполните команду:
-```
-npm run build
-```
-
-- Отправьте изменения в ваш удаленный репозиторий:
-```commandline
-git add -A
-git commit -m 'ваше_сообщение'
-git push -u origin main
-```
 
 - Для того, чтобы подключиться к серверу, необходимо в терминале ввести команду 
 ```
@@ -99,6 +58,21 @@ sudo apt upgrade
 - Установить базовые программы:
 `sudo apt install python3-venv python3-pip postgresql nginx`
 
+- Установим Node.js через NodeSource, сначала добавим NodeSource репозиторий:
+```
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+```
+
+- Затем установим Node.js и npm:
+```
+sudo apt-get install -y nodejs
+```
+
+- Проверим, что установка прошла успешно:
+```
+node -v
+npm -v
+```
 - Выполнить команду 
 `sudo systemctl start nginx`
 
@@ -107,11 +81,11 @@ sudo apt upgrade
 
 - Нажать `q` для выхода
 
-- Скопироуйте ваш репозиторий с проектом командой:
-`git clone https://github.com/ваш_пользователь/ваш_репозиторий.git`
+- Скопироуйте репозиторий с проектом командой:
+`git clone https://github.com/NadinDesyatova/diploma_project.git`
 
 - Зайти в папку проекта:
-`cd diploma_fpy_backend_version_1`
+`cd diploma_project`
 ```
 
 - Создайте базу данных, выполнив последовательно команды:
@@ -138,11 +112,11 @@ exit
 - Задать в файле .env значения для переменных окружения для settings.py: 
 ```
 SECRET_KEY=value # например, сгенерировать secret_key здесь: https://djecrety.ir/
-DEBUG=True # или False
+DEBUG=True #
 ALLOWED_HOSTS=value # перечислить через запятую, например localhost,127.0.0.1,ip_адрес_сервера
 DB_USER=postgres
 DB_NAME=value # название вашей базы данных
-DB_PASSWORD=pass # пароль от вашей базы данных
+DB_PASSWORD=pass # пароль вашего пользователя postgres
 DB_HOST=value # например, localhost
 DB_PORT=5432 
 MEDIA_URL=/media/ 
@@ -150,6 +124,35 @@ MEDIA_ROOT_NAME=media
 ```
 - Чтобы сохранять изменения файлов в nano нужно выполнять команды:
 `Ctrl + x` => `y` => `Enter`
+
+- Перейдите в папку frontend:
+`cd diploma_fpy_frontend`
+
+- Выполните команду
+```commandline
+npm install
+```
+
+- Создайте в корне папки frontend файл .env:
+```
+nano .env
+```
+
+- Задайте значения для переменных в файле .env:
+```
+VITE_APP_BASE_URL_WEBSITE = http://your-server-ip-or-domain.com/ # адрес клиентского приложения
+VITE_APP_BASE_USL_API = http://your-server-ip-or-domain.com/api/ # адрес api сервера
+```
+
+- Выполните команду:
+```
+npm run build
+```
+
+- Перейдите в папку backend:
+```
+cd ..
+```
 
 - Создайте и активируйте виртуальное окружение
 ```
@@ -163,11 +166,14 @@ source env/bin/activate
 - Установить gunicorn
 `pip install gunicorn`
 
+- В файле app/signals.py задайте корректные значения для пользователя (login, name, password) с правами администратора, 
+который будет создан в базе данных автоматически после проведения миграций
+```
+nano app/signals.py 
+```
+
 - Выполнить команду
 `python manage.py migrate`
-
-- Собираем статику с помощью команды:
-`python manage.py collectstatic`
 
 - Теперь можно сделать gunicorn сервисом в операционной системе, 
 чтобы он был постоянно запущен и при старте сервера сам перезапускался, 
@@ -181,10 +187,10 @@ Description=My Cloud Gunicorn Daemon
 After=network.target
 
 [Service]
-User=user_name # ваш пользователь
+User=ваш_пользователь
 Group=www-data
-WorkingDirectory=/home/ваш_пользователь/diploma_fpy_backend_version_1
-ExecStart=/home/ваш_пользователь/diploma_fpy_backend_version_1/env/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/ваш_пользователь/diploma_fpy_backend_version_1/diploma_backend/project.sock diploma_backend.wsgi:application
+WorkingDirectory=/home/ваш_пользователь/diploma_project
+ExecStart=/home/ваш_пользователь/diploma_project/env/bin/gunicorn --access-logfile - --workers 3 --bind unix:/home/ваш_пользователь/diploma_project/diploma_backend/project.sock diploma_backend.wsgi:application
 
 [Install]
 WantedBy=multi-user.target
@@ -209,18 +215,22 @@ server {
     access_log off;
     log_not_found off;
   }
+    
+  root /home/ваш_пользователь/diploma_project/diploma_fpy_frontend/dist; 
+  index index.html index.htm;
 
-  location /static/ {
-    root /home/ваш_пользователь/diploma_fpy_backend_version_1;
+  keepalive_timeout 5;
+
+  location / {
+    try_files $uri $uri/ /index.html;
   }
 
   location /media/ {
-    root /home/ваш_пользователь/diploma_fpy_backend_version_1;
+    root /home/ваш_пользователь/diploma_project;
   }
 
-  location / {
-    include proxy_params;
-    proxy_pass http://unix:/home/ваш_пользователь/diploma_fpy_backend_version_1/diploma_backend/project.sock;
+  location /api/ {
+    proxy_pass http://unix:/home/ваш_пользователь/diploma_project/diploma_backend/project.sock;
   }
 }
 ```
@@ -254,7 +264,4 @@ sudo systemctl restart mycloud
 sudo systemctl restart nginx
 ```
 
-### Чтобы открыть приложение, введите в адресной строке браузера: http://your-server-ip-or-domain.com/cloudapp/
-
-
-
+### Чтобы открыть приложение, введите в адресной строке браузера: http://your-server-ip-or-domain.com/
