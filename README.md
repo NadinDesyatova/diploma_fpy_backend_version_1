@@ -166,7 +166,7 @@ source env/bin/activate
 - Установить gunicorn
 `pip install gunicorn`
 
-- В файле app/signals.py задайте корректные значения для пользователя (login, name, password) с правами администратора, 
+- В файле app/signals.py задайте корректные значения для пользователя (login, name, password, email) с правами администратора, 
 который будет создан в базе данных автоматически после проведения миграций
 ```
 nano app/signals.py 
@@ -205,6 +205,7 @@ sudo systemctl enable mycloud
 
 - Затем необходимо настроить файл конфигурации nginx. Команда для создания файла с настройками nginx:
 `sudo nano /etc/nginx/sites-available/mycloud`
+
 - Сохранить настройки Nginx в файле
 ```
 server {
@@ -253,7 +254,7 @@ sudo ufw allow 'Nginx Full'
 sudo usermod www-data -aG ваш_пользователь
 ```
 
-## Рекомендации при внесении изменений в проект
+## При внесении изменений в проект:
 - Если изменения внесены в код приложения Django, нужно перезапустить процесс сервера.
 ```
 sudo systemctl restart mycloud
