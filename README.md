@@ -112,7 +112,7 @@ exit
 - Задать в файле .env значения для переменных окружения для settings.py: 
 ```
 SECRET_KEY=value # например, сгенерировать secret_key здесь: https://djecrety.ir/
-DEBUG=True #
+DEBUG=False
 ALLOWED_HOSTS=value # перечислить через запятую, например localhost,127.0.0.1,ip_адрес_сервера
 DB_USER=postgres
 DB_NAME=value # название вашей базы данных
