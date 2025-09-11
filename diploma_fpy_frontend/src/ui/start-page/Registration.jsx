@@ -12,7 +12,7 @@ export function Registration ({ SetViewPage }) {
 
   const inputRequirements = {
     login: {
-      regex: "^[a-zA-Z]{1}[a-zA-Z0-9]{3,20}$",
+      regex: "^[a-zA-Z]{1}[a-zA-Z0-9]{3,19}$",
       titleText: "Вводите только латинские буквы и цифры, первый символ - буква, длина от 4 до 20 символов."
     },
     password: {

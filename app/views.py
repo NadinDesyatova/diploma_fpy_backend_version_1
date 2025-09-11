@@ -179,7 +179,7 @@ class UsersViewSet(ModelViewSet):
             email_pattern = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
             email_error_msg = 'Введите правильный адрес электронной почты'
 
-            login_pattern = re.compile(r"^[a-zA-Z][a-zA-Z0-9]{3,20}$")
+            login_pattern = re.compile(r"^[a-zA-Z][a-zA-Z0-9]{3,19}$")
             login_error_msg = ('Корректный логин должен состоять только из латинских букв и цифр, первый символ - '
                                'буква, длина от 4 до 20 символов')
 
